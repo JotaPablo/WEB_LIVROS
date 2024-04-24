@@ -77,6 +77,13 @@ class AvaliacaoCreateAPIView(APIView):
 
             livro_avaliado = livro_avaliado.first()
             usuario_avaliando = request.user
+
+            #Testa se o usuário já avaliou esse livro, pois só pode haver uma avalição por usuário em cada livro
+            avaliacao = Avaliacao.objects.filter(livro_avaliado=livro_avaliado, usuario_avaliando=usuario_avaliando)
+
+            if avaliacao.exists():
+                return Response({'status': 403, 'msg': 'Esse usuário já avaliou esse livro'}, status = 403)
+
             nota = request.data.get('nota')
             if nota is None:
                 return Response({'status': 400, 'msg': 'Campo nota é obrigatório!'}, status = 400)

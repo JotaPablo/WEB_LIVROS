@@ -7,5 +7,4 @@ urlpatterns = [
     path('Autores/<int:pk>/', AutorDetailedView.as_view()),
     path('Staff/Autor/', StaffAutorView.as_view()),
     path('Staff/Autor/<int:autor_id>/', StaffAutorView.as_view()),
-    #hello
 ]

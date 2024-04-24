@@ -65,11 +65,13 @@ class StaffAutorView(APIView):
             return Response({'status': 404, 'msg': 'Autor não encontrado!'}, status = 404)
         
         autor = autor.first()
-        
+
+        #Se esse autor estiver atrelado a um usuário, temos que colocar  is_autor pra False
         usuario = Usuario.objects.filter(autor = autor)
 
         if usuario.exists():
-            return Response({'status': 403, 'msg': 'Autor já pertence a um usuário!'}, status = 403)
+            usuario = usuario.first()
+            usuario.is_autor = False
         
         autor.delete()
         return Response({'status': 200, 'msg': 'Deletado com SUCESSO'}, status = 200)

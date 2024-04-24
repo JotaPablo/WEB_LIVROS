@@ -15,12 +15,12 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
 class AvaliacaoSerializer(serializers.ModelSerializer):
   
-    livro_avaliado = LivroSerializer()
+    #livro_avaliado = LivroSerializer()
     usuario_avaliando = UsuarioSerializer()
 
     class Meta:
         model = Avaliacao
-        fields = ['id','livro_avaliado', 'usuario_avaliando', 'nota', 'descricao', 'data_avaliacao']
+        fields = ['id', 'usuario_avaliando', 'nota', 'descricao', 'data_avaliacao']
 
 class ComentarioSerializer(serializers.ModelSerializer):
 
