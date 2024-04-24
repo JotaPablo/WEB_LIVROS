@@ -8,6 +8,41 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.authentication import TokenAuthentication
 from Usuario.models import Usuario
 
+class StaffAtribuiAutorView(APIView):
+    #Autorizações: Se é está autenticado e se é Staff
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [TokenAuthentication]
+    
+    def patch(self, request, usuario_id, autor_id):
+        
+        usuario = Usuario.objects.filter(id = usuario_id)
+        if not usuario.exists():
+            return Response({'status': 404, 'msg': 'usuario não encontrado!'}, status = 404)
+                
+        usuario = usuario.first()
+
+        autor = Autor.objects.filter(id = autor_id)
+        if not autor.exists():
+            return Response({'status': 404, 'msg': 'Autor não encontrado!'}, status = 404)
+        
+        autor = autor.first()
+
+        usuario_autor = Usuario.objects.filter(autor = autor)
+
+        if usuario_autor.exists():
+            usuario_autor = usuario_autor.first()
+            usuario_autor.autor = None
+            usuario_autor.is_autor = True
+            usuario_autor.save()
+
+
+        usuario.autor = autor
+        usuario.is_autor = True
+        usuario.save()
+        return Response({'status': 200, 'msg': 'Atribuido com SUCESSO'}, status = 200)
+
+
+
 class StaffAutorView(APIView):
 
     #Autorizações: Se é está autenticado e se é Staff
@@ -72,6 +107,7 @@ class StaffAutorView(APIView):
         if usuario.exists():
             usuario = usuario.first()
             usuario.is_autor = False
+            usuario.save()
         
         autor.delete()
         return Response({'status': 200, 'msg': 'Deletado com SUCESSO'}, status = 200)
@@ -83,11 +119,6 @@ class StaffAutorView(APIView):
             return Response({'status': 404, 'msg': 'Autor não encontrado!'}, status = 404)
         
         autor = autor.first()
-        
-        usuario = Usuario.objects.filter(autor = autor)
-
-        if usuario.exists():
-            return Response({'status': 403, 'msg': 'Autor já pertence a um usuário!'}, status = 403)
         
         #Atualiza o nome se pedido
         nome = request.data.get('nome')
@@ -101,12 +132,12 @@ class StaffAutorView(APIView):
 
         #Atualiza o born_in se pedido
         born_in = request.data.get('born_in')
-        if nome is not None:
+        if born_in is not None:
             autor.born_in = born_in
 
         #Atualiza o dead_in se pedido
         died_in = request.data.get('died_in')
-        if nome is not None:
+        if died_in is not None:
             autor.died_in = died_in
 
         #Atualiza os generos do autor se pedido
@@ -134,11 +165,6 @@ class StaffAutorView(APIView):
 
         autor.save()
         return Response({'status': 200, 'msg': 'Alterado com SUCESSO'}, status = 200)
-
-
-
-
-
 
 class UsuarioAutorView(APIView):
 
@@ -236,12 +262,12 @@ class UsuarioAutorView(APIView):
 
         #Atualiza o born_in se pedido
         born_in = request.data.get('born_in')
-        if nome is not None:
+        if born_in is not None:
             autor.born_in = born_in
 
         #Atualiza o dead_in se pedido
         died_in = request.data.get('died_in')
-        if nome is not None:
+        if died_in is not None:
             autor.died_in = died_in
 
         #Atualiza os generos do autor se pedido

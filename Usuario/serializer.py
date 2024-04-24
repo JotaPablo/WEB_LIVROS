@@ -61,7 +61,7 @@ class EuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = ['id', 'username', 'nome', 'email', 'telefone', 'data_joined', 'autor', 
-                 'pais', 'generos_favoritos', 'is_private', 'lidos', 'lendo', 'quer_ler']
+                 'descricao','pais', 'generos_favoritos', 'is_private', 'lidos', 'lendo', 'quer_ler']
         
     #A quantidade de livros que leu, está lendo ou quer_ler
     #Mais informalções sobre quais são esses livros nas views de Status_Livro
