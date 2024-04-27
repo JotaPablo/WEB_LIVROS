@@ -42,6 +42,11 @@ class ListaStatusView(APIView):
 
 class UsuarioStatusView(APIView):
 
+    #Autorizações: Se é está autenticado
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+
     def get(self, request, status):
         usuario = request.user
 
@@ -70,6 +75,7 @@ class UsuarioStatusView(APIView):
             return Response({'status': 404, 'msg': 'Livro não encontrado'}, status = 404)
         
         livro = livro.first()
+
         usuario = request.user
 
         if status < 1 or status > 3:
@@ -78,7 +84,7 @@ class UsuarioStatusView(APIView):
         status_livro = Status_Livro.objects.filter(usuario=usuario, livro=livro)
 
         if status_livro.exists():
-            status_livro = status_livro.first
+            status_livro = status_livro.first()
             status_livro.status_livro = status
             status_livro.save()
 
