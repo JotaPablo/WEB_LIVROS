@@ -30,7 +30,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     data_joined = models.DateField(default=timezone.now)
     
     nome = models.CharField(max_length=150, null=True)
-    telefone = models.CharField(max_length=11, null = True)
+    telefone = models.CharField(max_length=11, null = True, blank = True)
     descricao = models.TextField(null=True, blank=True)
     pais = models.ForeignKey(Pais, on_delete=models.CASCADE, null=True)
     autor = models.ForeignKey(Autor, on_delete=models.SET_NULL, null=True, blank=True)

@@ -9,6 +9,8 @@ from rest_framework.decorators import action
 from django.contrib.auth.hashers import make_password
 from rest_framework.response import Response
 from Autor.models import Autor
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 # Create your views here.
 
@@ -22,7 +24,7 @@ class RegisterView(APIView):
             return Response({'status': 400, 'msg': 'O campo Username é obrigatório!'}, status = 400)
         user_exists = Usuario.objects.filter(username=username).exists()
         if user_exists:
-           return Response({'status': 409, 'msg': 'Username já existente!'})
+           return Response({'status': 409, 'msg': 'Username já existente!'}, status=409)
         
         #Testa se o campo password é None e se password é diferente  de confirm_password
         #Se forem iguais, criptografa a senha
@@ -45,9 +47,16 @@ class RegisterView(APIView):
         email = request.data.get('email')
         if email is None:
             return Response({'status': 400, 'msg': 'O campo email é obrigatório!'}, status = 400)
+        
         email_exist = Usuario.objects.filter(email = email).exists()
         if email_exist:
-            return Response({'status': 409, 'msg': 'Email já está em uso'})
+            return Response({'status': 409, 'msg': 'Email já está em uso'}, status = 409)
+        
+        #Testa se o o formato do email é válido
+        try:
+            validate_email(email)  
+        except ValidationError: 
+            return Response({'status': 400, 'msg': 'Email inválido'}, status = 400)
         
         #Telefone é opcional, então não verifico nada
         tel = request.data.get('telefone')
@@ -193,12 +202,20 @@ class UsuarioView(APIView):
         #Altera o campo de email se pedido
         email = request.data.get('email')
         if email is not None:
-
+            
+            #Verifica se esse email já não é usado
             email_exist = Usuario.objects.filter(email = email).exists()
             if email_exist:
                 return Response({'status': 409, 'msg': 'Email já está em uso'})
             
+            #Testa se o o formato do email é válido
+            try:
+                validate_email(email)  
+            except ValidationError: 
+                return Response({'status': 400, 'msg': 'Email inválido'}, status = 400)
+            
             usuario.email = email
+
         
         #Altera o telefone se pedido
         tel = request.data.get('telefone')
@@ -243,6 +260,42 @@ class UsuarioView(APIView):
         #Por ultimo, salva as alterações
         usuario.save()
         return Response({'status': 200, 'msg': 'Alterado com SUCESSO'}, status = 200)
+
+#Deletar um Usuário que não seja autor
+class StaffUsuarioView(APIView):
+   
+    #Autorizações: Se é está autenticado e se é staff
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [TokenAuthentication]
+
+
+    def delete(self, request, usuario_id):
+
+        #Testa se o Usuário existe
+        usuario = Usuario.objects.filter(usuario = usuario_id)
+        if not usuario.exists():
+            return Response({'status': 404, 'msg': "Usuário não encontrado"}, status= 404)
+        
+        usuario = usuario.first()
+
+        #Testa se o Usuário é staff. Se for, não se pode excluir ele
+        if usuario.is_staff:
+            return Response({'status': 401, 'msg': 'Não se pode excluir outros staffs'}, status = 401)
+        
+
+        #Se o Uusário tem um autor atrelado, testa na requisição se quer excluir esse autor também
+        autor_delete = request.data.get('autor_delete')
+        if usuario.is_autor and autor_delete is True:
+            autor = usuario.autor
+            autor.delete()
+
+        usuario.delete()
+
+        return Response({'status': 200, 'msg': 'Deletado com SUCESSO'}, status = 200)
+
+
+
+
 
 
 
