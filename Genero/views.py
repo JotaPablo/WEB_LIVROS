@@ -74,7 +74,7 @@ class ListUsuarioPorGeneroView(APIView):
             return Response({'status': 404, 'msg': 'Genero não encontrado'}, status = 404)
         genero = genero.first()
 
-        usuarios = Usuario.objects.filter(generos_favoritos = genero)
+        usuarios = Usuario.objects.filter(generos_favoritos = genero, is_private = False)
         serial = UsernameSerializer(usuarios, many = True)
 
         if len(serial.data) > 0:  

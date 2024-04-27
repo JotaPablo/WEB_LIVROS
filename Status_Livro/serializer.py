@@ -3,6 +3,7 @@ from .models import Status_Livro
 from Livro.serializer import LivroSerializer
 from Avaliacao.models import Avaliacao
 from Avaliacao.serializer import AvaliacaoSerializer
+from Usuario.serializer import UsernameSerializer
 
 class AvaliacaoLidoSerializer(serializers.ModelSerializer):
     
@@ -34,8 +35,16 @@ class LidoSerializer(serializers.ModelSerializer):
 
 class ListaLivroSerializer(serializers.ModelSerializer):
 
-    livro = LivroSerializer
+    livro = LivroSerializer()
 
     class Meta:
         model = Status_Livro
         fields = ['livro']
+
+class ListaUsuarioSerializer(serializers.ModelSerializer):
+
+    usuario = UsernameSerializer()
+
+    class Meta:
+        model = Status_Livro
+        fields = ['usuario']

@@ -8,6 +8,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
 from django.contrib.auth.hashers import make_password
 from rest_framework.response import Response
+from Autor.models import Autor
 
 # Create your views here.
 
@@ -152,6 +153,11 @@ class UsuarioView(APIView):
     
     def delete(self, request):
         usuario = request.user
+        autor_delete = request.data.get('autor_delete')
+        if usuario.is_autor and autor_delete is True:
+            autor = usuario.autor
+            autor.delete()
+
         usuario.delete()
         return Response({'status': 200, 'msg': 'Deletado com SUCESSO'}, status = 200)
 

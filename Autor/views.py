@@ -41,8 +41,6 @@ class StaffAtribuiAutorView(APIView):
         usuario.save()
         return Response({'status': 200, 'msg': 'Atribuido com SUCESSO'}, status = 200)
 
-
-
 class StaffAutorView(APIView):
 
     #Autorizações: Se é está autenticado e se é Staff
@@ -138,6 +136,8 @@ class StaffAutorView(APIView):
         #Atualiza o dead_in se pedido
         died_in = request.data.get('died_in')
         if died_in is not None:
+            if died_in is False:
+                died_in = None
             autor.died_in = died_in
 
         #Atualiza os generos do autor se pedido
@@ -268,6 +268,8 @@ class UsuarioAutorView(APIView):
         #Atualiza o dead_in se pedido
         died_in = request.data.get('died_in')
         if died_in is not None:
+            if died_in is False:
+                died_in = None
             autor.died_in = died_in
 
         #Atualiza os generos do autor se pedido
