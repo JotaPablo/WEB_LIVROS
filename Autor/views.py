@@ -8,31 +8,35 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.authentication import TokenAuthentication
 from Usuario.models import Usuario
 
+#Atribui um autor a um usuário
 class StaffAtribuiAutorView(APIView):
     #Autorizações: Se é está autenticado e se é Staff
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [TokenAuthentication]
     
     def patch(self, request, usuario_id, autor_id):
-        
+        #Testa se esse usuario existe
         usuario = Usuario.objects.filter(id = usuario_id)
         if not usuario.exists():
             return Response({'status': 404, 'msg': 'usuario não encontrado!'}, status = 404)
                 
         usuario = usuario.first()
 
+        #Testa se esse autor existe
         autor = Autor.objects.filter(id = autor_id)
         if not autor.exists():
             return Response({'status': 404, 'msg': 'Autor não encontrado!'}, status = 404)
         
         autor = autor.first()
 
+        #Testa se existe um usuário atribuido a esse autor
+        #Se houver, retira essa atribuição para atribuir no usuario desejado
         usuario_autor = Usuario.objects.filter(autor = autor)
 
         if usuario_autor.exists():
             usuario_autor = usuario_autor.first()
             usuario_autor.autor = None
-            usuario_autor.is_autor = True
+            usuario_autor.is_autor = False
             usuario_autor.save()
 
 
@@ -41,6 +45,7 @@ class StaffAtribuiAutorView(APIView):
         usuario.save()
         return Response({'status': 200, 'msg': 'Atribuido com SUCESSO'}, status = 200)
 
+#Cria, Altera e Deleta autores
 class StaffAutorView(APIView):
 
     #Autorizações: Se é está autenticado e se é Staff
@@ -166,6 +171,7 @@ class StaffAutorView(APIView):
         autor.save()
         return Response({'status': 200, 'msg': 'Alterado com SUCESSO'}, status = 200)
 
+#Cria, Altera e Deleta o autor de um usuário
 class UsuarioAutorView(APIView):
 
     #Autorizações: Se é está autenticado
@@ -226,7 +232,6 @@ class UsuarioAutorView(APIView):
         autor.save()
         return Response({'status': 201, 'msg': 'registered successfully'})
     
-
     def delete(self, request):
         usuario = request.user
         #Testa se usuário não é autor, pois se não for, não pode deletar
@@ -268,6 +273,8 @@ class UsuarioAutorView(APIView):
         #Atualiza o dead_in se pedido
         died_in = request.data.get('died_in')
         if died_in is not None:
+            #Se receber que died_in é falso, atribui None a ele. Essa solução veio para após inserir o died_in(talvez por engano)
+            # o usuário ainda possa tornar ele None novamente
             if died_in is False:
                 died_in = None
             autor.died_in = died_in
@@ -307,23 +314,23 @@ class ListaAutoresView(APIView):
         if len(serializer.data) > 0:
             return Response({
                 'status': 302,
-                'Livros': serializer.data
+                'Autores': serializer.data
             })
         return Response({'status': 204, 'msg': 'No Content'})
 
 #Lista um autor em especifico
 class AutorDetailedView(APIView):
-    def get(self, request, pk=None):  
-        if pk is not None:  
+    def get(self, request, autor_id=None):  
+        if autor_id is not None:  
             try:
-                autor = Autor.objects.get(pk=pk)
+                autor = Autor.objects.get(pk=autor_id)
                 serializer = AutorSerializerDetaield(autor)
                 return Response({
                     'status': 302,
-                    'Livro': serializer.data
+                    'Autor': serializer.data
                 })
             except Autor.DoesNotExist:
-                return Response({'status': 404, 'msg': 'Autor não encontrado'})
+                return Response({'status': 404, 'msg': 'Autor não encontrado'}, status=404)
         else:
-            return Response({'status': 404, 'msg': 'ID do Autor não fornecido'})
+            return Response({'status': 404, 'msg': 'ID do Autor não fornecido'}, status = 404)
         

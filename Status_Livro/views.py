@@ -12,8 +12,8 @@ from rest_framework.authentication import TokenAuthentication
 
 # Create your views here.
 
-class ListaLidosUsuarioView(APIView):
-    def get(self, request, usuario_id):
+class ListaStatusView(APIView):
+    def get(self, request, status, usuario_id):
         usuario = Usuario.objects.filter(id = usuario_id)
         if not usuario.exists():
             return Response({'status': 404, 'msg': 'Usuario não encontrado'})
@@ -21,32 +21,16 @@ class ListaLidosUsuarioView(APIView):
         usuario = usuario.first()
         if usuario.is_private:
             return Response({'status': 403, 'msg': 'Usuário é privado!'}, status = 403)
+        
+        if status < 1 or status > 3:
+            return Response({'status': 400, 'msg': 'Status precisa ser entre 1 e 3'}, status = 400)
 
 
-        status = Status_Livro.objects.filter(usuario=usuario, status = 1)
-        serial = LidoSerializer(status, many = True)
-
-        if len(serial.data) > 0:
-            return Response({
-                'status': 302,
-                'Livros': serial.data
-            }, status = 302)
+        status_livro = Status_Livro.objects.filter(usuario=usuario, status=status)
+        if status == 1: 
+            serial = LidoSerializer(status_livro, many=True)
         else:
-            return Response({'status': 204, 'msg': 'No content'}, status = 204)
-        
-class ListaLendoUsuarioView(APIView):
-    def get(self, request, usuario_id):
-        usuario = Usuario.objects.filter(id = usuario_id)
-        if not usuario.exists():
-            return Response({'status': 404, 'msg': 'Usuario não encontrado'})
-        
-        usuario = usuario.first()
-        if usuario.is_private:
-            return Response({'status': 403, 'msg': 'Usuário é privado!'}, status = 403)
-
-
-        status = Status_Livro.objects.filter(usuario=usuario, status = 2)
-        serial = ListaLivroSerializer(status, many = True)
+            serial = ListaLivroSerializer(status_livro, many = True)
 
         if len(serial.data) > 0:
             return Response({
@@ -56,38 +40,19 @@ class ListaLendoUsuarioView(APIView):
         else:
             return Response({'status': 204, 'msg': 'No content'}, status = 204)
 
-class ListaQuerLerUsuarioView(APIView):
-    def get(self, request, usuario_id):
-        usuario = Usuario.objects.filter(id = usuario_id)
-        if not usuario.exists():
-            return Response({'status': 404, 'msg': 'Usuario não encontrado'})
-        
-        usuario = usuario.first()
-        if usuario.is_private:
-            return Response({'status': 403, 'msg': 'Usuário é privado!'}, status = 403)
+class UsuarioStatusView(APIView):
 
-
-        status = Status_Livro.objects.filter(usuario=usuario, status = 3)
-        serial = ListaLivroSerializer(status, many = True)
-
-        if len(serial.data) > 0:
-            return Response({
-                'status': 302,
-                'Livros': serial.data
-            }, status = 302)
-        else:
-            return Response({'status': 204, 'msg': 'No content'}, status = 204)
-
-class UsuarioLidoView(APIView):
-
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
-    #get
-    def get(self, request):
+    def get(self, request, status):
         usuario = request.user
 
-        status = Status_Livro.objects.filter(usuario=usuario, status=1)
-        serial = LidoSerializer(status, many=True)
+        if status < 1 or status > 3:
+            return Response({'status': 400, 'msg': 'Status precisa ser entre 1 e 3'}, status = 400)
+
+        status_livro = Status_Livro.objects.filter(usuario=usuario, status=status)
+        if status == 1: 
+            serial = LidoSerializer(status_livro, many=True)
+        else:
+            serial = ListaLivroSerializer(status_livro, many = True)
 
         if len(serial.data) > 0:
             return Response({
@@ -96,9 +61,8 @@ class UsuarioLidoView(APIView):
             }, status = 302)
         else:
             return Response({'status': 204, 'msg': 'No content'}, status = 204)
-
-    #post
-    def post(self, request, livro_id):
+        
+    def post(self, request, livro_id, status):
 
         livro = Livro.objects.filter(id = livro_id)
 
@@ -108,102 +72,19 @@ class UsuarioLidoView(APIView):
         livro = livro.first()
         usuario = request.user
 
-        status = Status_Livro.objects.filter(usuario=usuario, livro=livro)
+        if status < 1 or status > 3:
+            return Response({'status': 400, 'msg': 'Status precisa ser entre 1 e 3'}, status = 400)
+        
+        status_livro = Status_Livro.objects.filter(usuario=usuario, livro=livro)
 
-        if status.exists():
-            status = status.first
-            status.status = 1
-            status.save()
+        if status_livro.exists():
+            status_livro = status_livro.first
+            status_livro.status_livro = status
+            status_livro.save()
 
         else:
-            status = Status_Livro.objects.create(livro = livro, usuario = usuario, status = 1)
-            status.save()
-        
-        return Response({'status': 201, 'msg': 'registered successfully'})
-        
-class UsuarioLendoView(APIView):
-    
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
-    
-    def get(self, request):
-        usuario = request.user
-
-        status = Status_Livro.objects.filter(usuario=usuario, status = 2)
-        serial = ListaLivroSerializer(status, many=True)
-
-        if len(serial.data) > 0:
-            return Response({
-                'status': 302,
-                'Livros': serial.data
-            }, status = 302)
-        else:
-            return Response({'status': 204, 'msg': 'No Content'}, status=204)
-
-    #post
-    def post(self, request, livro_id):
-
-        livro = Livro.objects.filter(id = livro_id)
-
-        if not livro.exists():
-            return Response({'status': 404, 'msg': 'Livro não encontrado'}, status = 404)
-        
-        livro = livro.first()
-        usuario = request.user
-
-        status = Status_Livro.objects.filter(usuario=usuario, livro=livro)
-
-        if status.exists():
-            status = status.first
-            status.status = 2
-            status.save()
-
-        else:
-            status = Status_Livro.objects.create(livro = livro, usuario = usuario, status = 2)
-            status.save()
-        
-        return Response({'status': 201, 'msg': 'registered successfully'})
-        
-class UsuarioQuerLerView(APIView):
-    
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
-    #get
-    def get(self, request):
-        usuario = request.user
-
-        status = Status_Livro.objects.filter(usuario=usuario, status = 3)
-        serial = ListaLivroSerializer(status, many=True)
-
-        if len(serial.data) > 0:
-            return Response({
-                'status': 302,
-                'Livros': serial.data
-            }, status = 302)
-        else:
-            return Response({'status': 204, 'msg': 'No Content'}, status=204)
-
-    #post
-    def post(self, request, livro_id):
-
-        livro = Livro.objects.filter(id = livro_id)
-
-        if not livro.exists():
-            return Response({'status': 404, 'msg': 'Livro não encontrado'}, status = 404)
-        
-        livro = livro.first()
-        usuario = request.user
-
-        status = Status_Livro.objects.filter(usuario=usuario, livro=livro)
-
-        if status.exists():
-            status = status.first
-            status.status = 2
-            status.save()
-
-        else:
-            status = Status_Livro.objects.create(livro = livro, usuario = usuario, status = 3)
-            status.save()
+            status_livro = Status_Livro.objects.create(livro = livro, usuario = usuario, status = status)
+            status_livro.save()
         
         return Response({'status': 201, 'msg': 'registered successfully'})
 
@@ -231,9 +112,9 @@ class UsuarioDeletaStatusView(APIView):
         status.delete()
         return Response({'status': 200, 'msg': 'Deletado com SUCESSO'}, status = 200)
         
-class ListaLidosLivroView(APIView):
-    def get(self, request, livro_id):
-        
+class ListaStatusLivroView(APIView):
+    def get(self, request, livro_id, status):
+
         #Checa se esse livro existe
         livro = Livro.objects.filter(id = livro_id)
 
@@ -242,54 +123,10 @@ class ListaLidosLivroView(APIView):
         
         livro = livro.first()
 
-        usuario = Status_Livro.objects.filter(livro = livro, usuario__is_private = False, status = 1)
+        if status < 1 or status > 3:
+            return Response({'status': 400, 'msg': 'Status precisa ser entre 1 e 3'}, status = 400)
 
-        serial = ListaUsuarioSerializer(usuario, many = True)
-
-        if len(serial.data) > 0:
-            return Response({
-                'status': 302,
-                'Usuários': serial.data
-            }, status = 302)
-        else:
-            return Response({'status': 204, 'msg': 'No Content'}, status=204)
-        
-class ListaLendoLivroView(APIView):
-    def get(self, request, livro_id):
-        
-        #Checa se esse livro existe
-        livro = Livro.objects.filter(id = livro_id)
-
-        if not livro.exists():
-            return Response({'status': 404, 'msg': 'Livro não encontrado'}, status = 404)
-        
-        livro = livro.first()
-
-        usuario = Status_Livro.objects.filter(livro = livro, usuario__is_private = False, status = 2)
-
-        serial = ListaUsuarioSerializer(usuario, many = True)
-
-        if len(serial.data) > 0:
-            return Response({
-                'status': 302,
-                'Usuários': serial.data
-            }, status = 302)
-        else:
-            return Response({'status': 204, 'msg': 'No Content'}, status=204)
-        
-class ListaQuerLerLivroView(APIView):
-
-    def get(self, request, livro_id):
-        
-        #Checa se esse livro existe
-        livro = Livro.objects.filter(id = livro_id)
-
-        if not livro.exists():
-            return Response({'status': 404, 'msg': 'Livro não encontrado'}, status = 404)
-        
-        livro = livro.first()
-
-        usuario = Status_Livro.objects.filter(livro = livro, usuario__is_private = False, status = 3)
+        usuario = Status_Livro.objects.filter(livro = livro, usuario__is_private = False, status = status)
 
         serial = ListaUsuarioSerializer(usuario, many = True)
 

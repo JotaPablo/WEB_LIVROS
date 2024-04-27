@@ -91,8 +91,8 @@ class ListLivrosPorGeneroView(APIView):
             return Response({'status': 404, 'msg': 'Genero não encontrado'}, status = 404)
         genero = genero.first()
 
-        usuarios = Livro.objects.filter(generos_livro = genero)
-        serial = LivroSerializer(usuarios, many = True)
+        livros = Livro.objects.filter(generos_livro = genero)
+        serial = LivroSerializer(livros, many = True)
 
         if len(serial.data) > 0:  
             return Response({'status': 200, 'Livros': serial.data},status=200)
@@ -108,11 +108,11 @@ class ListAutoresPorGeneroView(APIView):
             return Response({'status': 404, 'msg': 'Genero não encontrado'}, status = 404)
         genero = genero.first()
 
-        usuarios = Autor.objects.filter(generos_autor = genero)
-        serial = ListaAutoresSerializer(usuarios, many = True)
+        autores = Autor.objects.filter(generos_autor = genero)
+        serial = ListaAutoresSerializer(autores, many = True)
 
         if len(serial.data) > 0:  
-            return Response({'status': 200, 'Livros': serial.data},status=200)
+            return Response({'status': 200, 'Autores': serial.data},status=200)
 
         return Response({'status': 204, 'msg': 'No Content'}, status=204)
     

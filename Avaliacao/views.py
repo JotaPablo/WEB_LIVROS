@@ -115,10 +115,14 @@ class ComentarioCreateAPIView(APIView):
     
     def post(self, request):
             avaliacao_comentada = request.data.get('avaliacao_comentada')
+            if avaliacao_comentada is None:
+                return Response({'status': 400, 'msg': 'Campo avaliacao_comentada é obrigatório!'}, status = 400)
             avaliacao_comentada = Avaliacao.objects.filter(id = avaliacao_comentada)
             avaliacao_comentada = avaliacao_comentada.first()
             usuario_comentando = request.user
             descricao = request.data.get('descricao')
+            if descricao is None:
+                return Response({'status': 400, 'msg': 'Campo descricao é obrigatório!'}, status = 400)
             
             comentario = Comentario.objects.create(avaliacao_comentada=avaliacao_comentada,usuario_comentando=usuario_comentando,descricao=descricao)  
             comentario.save()

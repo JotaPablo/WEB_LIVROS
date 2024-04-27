@@ -1,6 +1,4 @@
 from rest_framework.views import APIView
-
-
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
@@ -14,6 +12,7 @@ from Usuario.serializer import UsernameSerializer
 
 # Create your views here.
 
+#Cria, Altera e Exclue Paises(Staff)
 class StaffPaisView(APIView):
     #Autorizações: Se está autenticado e se é parte da Staff
     permission_classes = [IsAuthenticated, IsAdminUser]
@@ -54,7 +53,7 @@ class StaffPaisView(APIView):
 
         return Response({'status': 200, 'msg': 'Deletado com SUCESSO'}, status = 200)
 
-        
+#Lista todos os paises
 class ListPaisView(APIView):
     
     def get(self, request):
@@ -65,8 +64,8 @@ class ListPaisView(APIView):
         
         return Response({'status': 204, 'msg': 'No Content'}, status = 204)
     
-    #def lista usuarios de um pais especifico
-    
+  
+#Lista todos os usuários de um país
 class UsuarioPaisView(APIView):
     
     def get(self, request, pais_id):

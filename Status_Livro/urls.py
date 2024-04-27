@@ -1,18 +1,10 @@
 from django.urls import path
-from .views import UsuarioLidoView, UsuarioLendoView, UsuarioQuerLerView, UsuarioDeletaStatusView, ListaLidosUsuarioView, ListaLendoUsuarioView, ListaQuerLerUsuarioView
-from .views import ListaLidosLivroView, ListaQuerLerLivroView, ListaLendoLivroView
+from .views import ListaStatusView, UsuarioStatusView, ListaStatusLivroView, UsuarioDeletaStatusView
+
 urlpatterns = [
-    path('Usuario/<int:usuario_id>/Livros/Lidos/', ListaLidosUsuarioView.as_view()),
-    path('Usuario/<int:usuario_id>/Livros/Lendo/', ListaLendoUsuarioView.as_view()),
-    path('Usuario/<int:usuario_id>/Livros/QuerLer/', ListaQuerLerUsuarioView.as_view()),
-    path('Usuario/me/Livros/Lidos/', UsuarioLidoView.as_view()),
-    path('Usuario/me/Livros/Lidos/<int:livro_id>/', UsuarioLidoView.as_view()),
-    path('Usuario/me/Livros/Lendo/', UsuarioLendoView.as_view()),
-    path('Usuario/me/Livros/Lendo/<int:livro_id>/', UsuarioLendoView.as_view()),
-    path('Usuario/me/Livros/QuerLer/', UsuarioQuerLerView.as_view()),
-    path('Usuario/me/Livros/QuerLer/<int:livro_id>/', UsuarioQuerLerView.as_view()),
-    path('Usuario/me/Livros/Status/Delete/<int:livro_id>/', UsuarioDeletaStatusView.as_view()),
-    path('Livros/<int:livro_id>/Lidos/', ListaLidosLivroView.as_view()),
-    path('Livros/<int:livro_id>/Lendo/', ListaLendoLivroView.as_view()),
-    path('Livros/<int:livro_id>/QuerLer/', ListaQuerLerLivroView.as_view()),
+    path('Usuario/<int:usuario_id>/Livros/<int:status>/', ListaStatusView.as_view()),
+    path('Usuario/me/Status/<int:status>/Livro/<int:livro_id>/', UsuarioStatusView.as_view()),
+    path('Usuario/me/Status/<int:status>/Livro/', UsuarioStatusView.as_view()),
+    path('Usuario/me/Status/delete/Livro/<int:livro_id>/', UsuarioDeletaStatusView.as_view()),
+    path('Livro/<int:livro_id>/Status/<int:status>/', ListaStatusLivroView.as_view()),
 ]
